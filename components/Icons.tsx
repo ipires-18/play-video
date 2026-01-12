@@ -63,6 +63,23 @@ const Icons = {
       <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
     </svg>
   ),
+  ReRecord: ({ className }: IconProps) => (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <path d="M15.5441 4.45436C15.9402 4.16246 16.5 4.44531 16.5 4.9374V13.0626C16.5 13.5547 15.9402 13.8375 15.5441 13.5456L10.0305 9.48303C9.7051 9.24324 9.7051 8.75676 10.0305 8.51697L15.5441 4.45436Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M7.29408 4.45436C7.69024 4.16246 8.25 4.44531 8.25 4.9374V13.0626C8.25 13.5547 7.69024 13.8375 7.29408 13.5456L1.78055 9.48303C1.4551 9.24324 1.4551 8.75676 1.78055 8.51697L7.29408 4.45436Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  Checkbox: ({ className }: IconProps) => (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <rect x="3" y="3" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    </svg>
+  ),
+  CheckboxChecked: ({ className }: IconProps) => (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+      <rect x="3" y="3" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.5" fill="currentColor"/>
+      <path d="M6 9L8 11L12 7" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
 };
 
 export default Icons;
