@@ -4,7 +4,7 @@ import VideoPlayer from './src/components/video-player';
 import VideoRecorder from './src/components/video-recorder';
 
 const App: React.FC = () => {
-  const [jobType, setJobType] = useState<JobType>('company');
+  const [jobType, setJobType] = useState<JobType>(JobType.COMPANY);
   const [mode, setMode] = useState<'view' | 'record'>('view');
   const videoSrc =
     'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';

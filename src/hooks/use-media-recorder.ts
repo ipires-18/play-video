@@ -31,7 +31,7 @@ export const useMediaRecorder = ({
   maxDurationSeconds,
   onRecordingComplete,
 }: UseMediaRecorderProps): UseMediaRecorderReturn => {
-  const [status, setStatus] = useState<RecorderStatus>('idle');
+  const [status, setStatus] = useState<RecorderStatus>(RecorderStatus.IDLE);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -94,14 +94,14 @@ export const useMediaRecorder = ({
           clearInterval(timerIntervalRef.current);
           timerIntervalRef.current = null;
         }
-        setStatus('idle');
+        setStatus(RecorderStatus.IDLE);
       };
 
       // Para iOS/Safari, usar timeslice maior pode ajudar
       const timeslice = isIOS ? 2000 : 1000;
       recorder.start(timeslice);
       mediaRecorderRef.current = recorder;
-      setStatus('recording');
+      setStatus(RecorderStatus.RECORDING);
 
       timerIntervalRef.current = window.setInterval(() => {
         setElapsedTime((prev) => {
@@ -117,7 +117,7 @@ export const useMediaRecorder = ({
               clearInterval(timerIntervalRef.current);
               timerIntervalRef.current = null;
             }
-            setStatus('reviewing');
+            setStatus(RecorderStatus.REVIEWING);
             onRecordingComplete();
             return prev;
           }
@@ -126,7 +126,7 @@ export const useMediaRecorder = ({
       }, 1000);
     } catch (err: any) {
       console.error('Error starting MediaRecorder:', err);
-      setStatus('idle');
+      setStatus(RecorderStatus.IDLE);
     }
   }, [stream, mimeType, maxDurationSeconds, onRecordingComplete]);
 
@@ -141,12 +141,12 @@ export const useMediaRecorder = ({
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
-    setStatus('reviewing');
+    setStatus(RecorderStatus.REVIEWING);
   }, []);
 
   // Criar preview URL quando entrar em reviewing
   useEffect(() => {
-    if (status === 'reviewing' && recordedChunks.length > 0) {
+    if (status === RecorderStatus.REVIEWING && recordedChunks.length > 0) {
       // Determinar o tipo MIME correto baseado no codec usado
       const blobType = mimeType?.includes('mp4')
         ? 'video/mp4'

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useImperativeHandle, forwardRef } from 'react';
 import { VideoPlayerProps } from '../../types';
 import { useVideoPlayer } from '../hooks/use-video-player';
 import { useVideoProgress } from '../hooks/use-video-progress';
@@ -16,115 +16,176 @@ import {
   VideoStyles,
   BigPlayButton,
   BufferingOverlay,
+  ControlBar,
 } from './shared';
+import { cn } from '@foursales/components';
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, jobType }) => {
-  const theme = getTheme(jobType);
+export interface VideoPlayerRef {
+  togglePlay: () => void;
+  setCurrentTime: (time: number) => void;
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+}
 
-  // Hooks
-  const {
-    videoRef,
-    isPlaying,
-    isBuffering,
-    currentTime,
-    duration,
-    togglePlay,
-    handleTimeUpdate,
-    handleLoadedMetadata,
-    handlePlay,
-    handlePause,
-    handleWaiting,
-    handlePlaying,
-    setCurrentTime,
-  } = useVideoPlayer();
+const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
+  (
+    {
+      src,
+      srcObject,
+      poster,
+      jobType,
+      hideControls = false,
+      onStateChange,
+      className = 'w-full h-full object-contain',
+      autoPlay = false,
+      muted = false,
+    },
+    ref
+  ) => {
+    const theme = getTheme(jobType);
 
-  const { containerRef, isFullscreen, toggleFullscreen } = useFullscreen();
+    // Hooks
+    const {
+      videoRef,
+      isPlaying,
+      isBuffering,
+      currentTime,
+      duration,
+      togglePlay,
+      handleTimeUpdate,
+      handleLoadedMetadata,
+      handlePlay,
+      handlePause,
+      handleWaiting,
+      handlePlaying,
+      setCurrentTime,
+    } = useVideoPlayer();
 
-  const { isMuted, volume, toggleMute, handleVolumeChange } = useVolume({
-    videoRef,
-  });
+    const { containerRef, isFullscreen, toggleFullscreen } = useFullscreen();
 
-  const { playbackRate, handlePlaybackRate } = usePlaybackRate({
-    videoRef,
-  });
+    const { isMuted, volume, toggleMute, handleVolumeChange } = useVolume({
+      videoRef,
+    });
 
-  const { handleProgressClick, progressPercentage } = useVideoProgress({
-    videoRef,
-    duration,
-    currentTime,
-    setCurrentTime,
-  });
+    const { playbackRate, handlePlaybackRate } = usePlaybackRate({
+      videoRef,
+    });
 
-  return (
-    <div className="relative w-full h-full bg-slate-50 flex flex-col p-4 md:p-8">
-      {/* Video Canvas Container */}
-      <div
-        ref={containerRef}
-        className="relative flex-1 rounded-2xl overflow-hidden shadow-lg bg-black"
-      >
-        <VideoStyles />
+    const { handleProgressClick, progressPercentage } = useVideoProgress({
+      videoRef,
+      duration,
+      currentTime,
+      setCurrentTime,
+    });
 
-        <video
-          ref={videoRef}
-          src={src}
-          poster={poster}
-          className="w-full h-full object-contain"
-          onPlay={handlePlay}
-          onPause={handlePause}
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-          onWaiting={handleWaiting}
-          onPlaying={handlePlaying}
-          playsInline
-        />
+    // Expor métodos e estado via ref
+    useImperativeHandle(ref, () => ({
+      togglePlay,
+      setCurrentTime,
+      isPlaying,
+      currentTime,
+      duration,
+    }));
 
-        <BufferingOverlay isBuffering={isBuffering} />
+    // Notificar mudanças de estado
+    useEffect(() => {
+      if (onStateChange) {
+        onStateChange({
+          isPlaying,
+          currentTime,
+          duration,
+        });
+      }
+    }, [isPlaying, currentTime, duration, onStateChange]);
 
-        {!isPlaying && !isBuffering && <BigPlayButton onClick={togglePlay} />}
-      </div>
+    // Gerenciar srcObject quando fornecido
+    useEffect(() => {
+      if (videoRef.current && srcObject) {
+        videoRef.current.srcObject = srcObject;
+        if (autoPlay) {
+          videoRef.current.play().catch((error) => {
+            console.error('Error playing video:', error);
+          });
+        }
+      } else if (videoRef.current && !srcObject) {
+        // Limpar srcObject quando não fornecido
+        videoRef.current.srcObject = null;
+      }
+    }, [srcObject, autoPlay]);
 
-      {/* Control Bar */}
-      <div className="mt-6 flex justify-center">
+    return (
+      <div className="relative w-full h-full bg-transparent flex flex-col p-4 md:p-8">
+        {/* Video Canvas Container */}
         <div
-          className={`w-full max-w-4xl h-[44px] rounded-full ${theme.barBg} flex items-center px-6 shadow-sm border border-slate-200/50`}
+          ref={containerRef}
+          className="relative flex-1 rounded-2xl overflow-hidden shadow-lg bg-transparent"
         >
-          {/* Left Side: Time */}
-          <div className="flex items-center space-x-3 min-w-0">
-            <TimeDisplay currentTime={currentTime} duration={duration} />
-          </div>
+          <VideoStyles />
 
-          {/* Center: Progress Scrubber */}
-          <ProgressBar
-            progressPercentage={progressPercentage}
-            theme={theme}
-            onClick={handleProgressClick}
+          <video
+            ref={videoRef}
+            src={srcObject ? undefined : src}
+            poster={poster}
+            className={cn('w-full h-full object-contain', className)}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            onTimeUpdate={handleTimeUpdate}
+            onLoadedMetadata={handleLoadedMetadata}
+            onWaiting={handleWaiting}
+            onPlaying={handlePlaying}
+            playsInline
+            autoPlay={autoPlay}
+            muted={muted}
           />
 
-          {/* Right Side: Action Buttons */}
-          <div className="flex items-center space-x-4 ml-4 flex-shrink-0">
-            <PlayButton isPlaying={isPlaying} onClick={togglePlay} />
+          <BufferingOverlay isBuffering={isBuffering} />
 
-            <VolumeControl
-              isMuted={isMuted}
-              volume={volume}
-              onToggleMute={toggleMute}
-              onVolumeChange={handleVolumeChange}
-            />
-
-            <SpeedSelector
-              playbackRate={playbackRate}
-              onRateChange={handlePlaybackRate}
-            />
-
-            <FullscreenButton
-              isFullscreen={isFullscreen}
-              onClick={toggleFullscreen}
-            />
-          </div>
+          {!isPlaying && !isBuffering && <BigPlayButton onClick={togglePlay} />}
         </div>
+
+        {/* Control Bar */}
+        {!hideControls && (
+          <ControlBar
+            theme={theme}
+            leftContent={
+              <>
+                <PlayButton isPlaying={isPlaying} onClick={togglePlay} />
+                <VolumeControl
+                  isMuted={isMuted}
+                  volume={volume}
+                  onToggleMute={toggleMute}
+                  onVolumeChange={handleVolumeChange}
+                />
+                <TimeDisplay currentTime={currentTime} duration={duration} />
+              </>
+            }
+            centerContent={
+              <ProgressBar
+                progressPercentage={progressPercentage}
+                theme={theme}
+                onClick={handleProgressClick}
+              />
+            }
+            rightContent={
+              <>
+                <SpeedSelector
+                  playbackRate={playbackRate}
+                  onRateChange={handlePlaybackRate}
+                />
+                <FullscreenButton
+                  isFullscreen={isFullscreen}
+                  onClick={toggleFullscreen}
+                />
+              </>
+            }
+          />
+        )}
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
+
+VideoPlayer.displayName = 'VideoPlayer';
 
 export default VideoPlayer;

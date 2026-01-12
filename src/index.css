@@ -1,0 +1,4 @@
+@import 'tailwindcss';
+@import '../node_modules/@foursales/components/build/index.css';
+@import '../node_modules/@foursales/components/build/theme/theme.css';
+@import '../node_modules/@foursales/components/build/theme/global-workpass.css';

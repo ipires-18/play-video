@@ -12,7 +12,7 @@ export interface Theme {
  * Retorna o tema baseado no tipo de job
  */
 export const getTheme = (jobType: JobType): Theme => {
-  const isCompany = jobType === 'company';
+  const isCompany = jobType === JobType.COMPANY;
   return {
     barBg: 'bg-[#e9f2ee]', // Light greenish background
     textPrimary: 'text-[#4a5568]',

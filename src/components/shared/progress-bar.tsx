@@ -18,7 +18,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   showDot = true,
 }) => {
   return (
-    <div className="flex-1 px-8 relative flex items-center">
+    <div className="w-full px-8 relative flex items-center">
       <div
         className="w-full h-1 bg-slate-300 rounded-full relative overflow-hidden cursor-pointer"
         onClick={onClick}

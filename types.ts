@@ -1,11 +1,37 @@
-export type JobType = 'secret' | 'company';
+export enum JobType {
+  SECRET = 'secret',
+  COMPANY = 'company',
+}
+
+export enum RecorderStatus {
+  IDLE = 'idle',
+  REQUESTING = 'requesting',
+  COUNTDOWN = 'countdown',
+  RECORDING = 'recording',
+  REVIEWING = 'reviewing',
+  COMPLETED = 'completed',
+}
 
 export interface VideoPlayerProps {
-  src: string;
+  src?: string;
+  srcObject?: MediaStream;
   poster?: string;
   jobType: JobType;
   companyName?: string;
   onEnded?: () => void;
+  hideControls?: boolean;
+  onStateChange?: (state: {
+    isPlaying: boolean;
+    currentTime: number;
+    duration: number;
+  }) => void;
+  externalControl?: {
+    togglePlay?: () => void;
+    setCurrentTime?: (time: number) => void;
+  };
+  className?: string;
+  autoPlay?: boolean;
+  muted?: boolean;
 }
 
 export interface PlayerState {
@@ -18,14 +44,6 @@ export interface PlayerState {
   isFullscreen: boolean;
   isBuffering: boolean;
 }
-
-export type RecorderStatus =
-  | 'idle'
-  | 'requesting'
-  | 'countdown'
-  | 'recording'
-  | 'reviewing'
-  | 'completed';
 
 export interface VideoRecorderProps {
   jobType: JobType;

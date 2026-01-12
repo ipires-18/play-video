@@ -17,3 +17,5 @@ export { BufferingOverlay } from './buffering-overlay';
 export type { BufferingOverlayProps } from './buffering-overlay';
 export { CountdownOverlay } from './countdown-overlay';
 export type { CountdownOverlayProps } from './countdown-overlay';
+export { ControlBar } from './control-bar';
+export type { ControlBarProps } from './control-bar';
