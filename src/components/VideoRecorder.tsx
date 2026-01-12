@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { VideoRecorderProps, RecorderStatus } from '../types';
+import { VideoRecorderProps, RecorderStatus } from '../../types';
 import Icons from './Icons';
 
 // Detectar se é iOS/Safari/Mac

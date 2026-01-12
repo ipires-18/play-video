@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { VideoPlayerProps, PlayerState } from '../types';
+import { VideoPlayerProps, PlayerState } from '../../types';
 import Icons from './Icons';
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, jobType }) => {
