@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { JobType } from './types';
-import VideoPlayer from './src/components/VideoPlayer';
-import VideoRecorder from './src/components/VideoRecorder';
+import VideoPlayer from './src/components/video-player';
+import VideoRecorder from './src/components/video-recorder';
 
 const App: React.FC = () => {
   const [jobType, setJobType] = useState<JobType>('company');

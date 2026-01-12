@@ -1,4 +1,3 @@
-
 export type JobType = 'secret' | 'company';
 
 export interface VideoPlayerProps {
@@ -20,7 +19,13 @@ export interface PlayerState {
   isBuffering: boolean;
 }
 
-export type RecorderStatus = 'idle' | 'requesting' | 'countdown' | 'recording' | 'reviewing' | 'completed';
+export type RecorderStatus =
+  | 'idle'
+  | 'requesting'
+  | 'countdown'
+  | 'recording'
+  | 'reviewing'
+  | 'completed';
 
 export interface VideoRecorderProps {
   jobType: JobType;
