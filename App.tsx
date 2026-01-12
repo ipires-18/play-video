@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import VideoPlayer from './components/VideoPlayer';
-import VideoRecorder from './components/VideoRecorder';
 import { JobType } from './types';
+import VideoPlayer from './src/components/VideoPlayer';
+import VideoRecorder from './src/components/VideoRecorder';
 
 const App: React.FC = () => {
   const [jobType, setJobType] = useState<JobType>('company');
   const [mode, setMode] = useState<'view' | 'record'>('view');
-  const videoSrc = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+  const videoSrc =
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
   const posterUrl = 'https://picsum.photos/seed/video/1280/720';
 
   const handleRecordingComplete = (blob: Blob) => {
@@ -46,14 +47,14 @@ const App: React.FC = () => {
 
         <main className="aspect-video w-full bg-black relative">
           {mode === 'view' ? (
-            <VideoPlayer 
-              src={videoSrc} 
-              poster={posterUrl} 
-              jobType={jobType} 
+            <VideoPlayer
+              src={videoSrc}
+              poster={posterUrl}
+              jobType={jobType}
               companyName="TechCorp"
             />
           ) : (
-            <VideoRecorder 
+            <VideoRecorder
               jobType={jobType}
               maxDurationSeconds={180}
               allowReRecord={true}
