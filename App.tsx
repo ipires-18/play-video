@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import VideoPlayer from './components/VideoPlayer';
 import VideoRecorder from './components/VideoRecorder';
