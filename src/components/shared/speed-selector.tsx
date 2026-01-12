@@ -1,10 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { useClickOutside } from '../../hooks/use-click-outside';
+import { cn, Typography } from '@foursales/components';
 
 export interface SpeedSelectorProps {
   playbackRate: number;
   onRateChange: (rate: number) => void;
   availableRates?: number[];
+  className?: string;
 }
 
 /**
@@ -14,6 +16,7 @@ export const SpeedSelector: React.FC<SpeedSelectorProps> = ({
   playbackRate,
   onRateChange,
   availableRates = [0.5, 0.75, 1, 1.25, 1.5, 2],
+  className,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -31,11 +34,19 @@ export const SpeedSelector: React.FC<SpeedSelectorProps> = ({
       <button
         ref={buttonRef}
         onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center space-x-1 px-2 py-1 bg-white/50 hover:bg-white/70 rounded text-xs font-semibold transition-colors text-slate-700"
+        className={cn(
+          'flex items-center space-x-1 px-2 py-1 bg-transparent hover:bg-transparent rounded text-xs font-semibold transition-colors text-wkp-primary-dark hover:text-wkp-primary-darker cursor-pointer',
+          className
+        )}
         aria-label="Velocidade de reprodução"
         aria-expanded={showMenu}
       >
-        <span>{playbackRate}x</span>
+        <Typography
+          className={cn('whitespace-nowrap tabular-nums ', className)}
+          variant="body-medium-regular"
+        >
+          {playbackRate}x
+        </Typography>
       </button>
       {showMenu && (
         <div
@@ -49,13 +60,20 @@ export const SpeedSelector: React.FC<SpeedSelectorProps> = ({
                 onRateChange(rate);
                 setShowMenu(false);
               }}
-              className={`px-3 py-1.5 text-xs text-left rounded hover:bg-slate-100 transition-colors ${
-                playbackRate === rate
-                  ? 'text-indigo-600 font-semibold'
-                  : 'text-slate-700'
-              }`}
+              className="px-3 py-1.5 text-xs text-left rounded hover:bg-slate-100 transition-colors cursor-pointer"
             >
-              {rate}x
+              <Typography
+                className={cn(
+                  'whitespace-nowrap tabular-nums',
+                  playbackRate === rate
+                    ? 'text-wkp-primary-darker'
+                    : 'text-wkp-primary-dark',
+                  className
+                )}
+                variant="body-medium-regular"
+              >
+                {rate}x
+              </Typography>
             </button>
           ))}
         </div>

@@ -22,11 +22,11 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   return (
     <div className={`mt-6 flex justify-center ${className}`}>
       <div
-        className={`w-full max-w-4xl h-[44px] rounded-full ${theme.barBg} flex items-center px-6 shadow-sm border border-slate-200/50`}
+        className={`w-full max-w-4xl h-11 rounded-full flex items-center bg-wkp-primary-lighter px-4 py-[0.938rem]`}
       >
         {/* Left Side */}
         {leftContent && (
-          <div className="flex items-center space-x-3 flex-shrink-0">
+          <div className="flex items-center space-x-3 shrink-0 px-2">
             {leftContent}
           </div>
         )}
@@ -36,7 +36,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 
         {/* Right Side */}
         {rightContent && (
-          <div className="flex items-center space-x-3 ml-4 flex-shrink-0">
+          <div className="flex items-center space-x-3 ml-4 shrink-0">
             {rightContent}
           </div>
         )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { formatTime } from '../../helpers/time';
+import { cn, Typography } from '@foursales/components';
 
 export interface TimeDisplayProps {
   currentTime: number;
@@ -16,11 +17,15 @@ export const TimeDisplay: React.FC<TimeDisplayProps> = ({
   className = '',
 }) => {
   return (
-    <span
-      className={`text-slate-700 font-medium whitespace-nowrap tabular-nums ${className}`}
+    <Typography
+      className={cn(
+        'whitespace-nowrap tabular-nums text-wkp-primary-dark',
+        className
+      )}
+      variant="body-medium-regular"
     >
       {formatTime(Math.floor(currentTime))} de{' '}
       {formatTime(Math.floor(duration))}
-    </span>
+    </Typography>
   );
 };

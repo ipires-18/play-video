@@ -1,4 +1,9 @@
-import React, { useEffect, useImperativeHandle, forwardRef } from 'react';
+import React, {
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+  useState,
+} from 'react';
 import { VideoPlayerProps } from '../../types';
 import { useVideoPlayer } from '../hooks/use-video-player';
 import { useVideoProgress } from '../hooks/use-video-progress';
@@ -36,6 +41,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       poster,
       jobType,
       hideControls = false,
+      showControlsOnPlay = true,
       onStateChange,
       className = 'w-full h-full object-contain',
       autoPlay = false,
@@ -44,6 +50,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     ref
   ) => {
     const theme = getTheme(jobType);
+    const [showControls, setShowControls] = useState(!showControlsOnPlay);
 
     // Hooks
     const {
@@ -141,11 +148,20 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
 
           <BufferingOverlay isBuffering={isBuffering} />
 
-          {!isPlaying && !isBuffering && <BigPlayButton onClick={togglePlay} />}
+          {!isPlaying && !isBuffering && (
+            <BigPlayButton
+              onClick={() => {
+                togglePlay();
+                if (showControlsOnPlay) {
+                  setShowControls(true);
+                }
+              }}
+            />
+          )}
         </div>
 
         {/* Control Bar */}
-        {!hideControls && (
+        {!hideControls && showControls && (
           <ControlBar
             theme={theme}
             leftContent={
@@ -156,6 +172,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
                   volume={volume}
                   onToggleMute={toggleMute}
                   onVolumeChange={handleVolumeChange}
+                  jobType={jobType}
                 />
                 <TimeDisplay currentTime={currentTime} duration={duration} />
               </>

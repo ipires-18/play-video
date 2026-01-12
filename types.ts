@@ -20,6 +20,7 @@ export interface VideoPlayerProps {
   companyName?: string;
   onEnded?: () => void;
   hideControls?: boolean;
+  showControlsOnPlay?: boolean;
   onStateChange?: (state: {
     isPlaying: boolean;
     currentTime: number;
