@@ -14,7 +14,7 @@ export interface PreRecordingTimerProps {
  */
 export const PreRecordingTimer: React.FC<PreRecordingTimerProps> = ({
   jobType,
-  durationSeconds = 30,
+  durationSeconds = 90,
   onTimerComplete,
   onSkip,
 }) => {
