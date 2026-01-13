@@ -119,15 +119,32 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       if (videoRef.current && srcObject) {
         videoRef.current.srcObject = srcObject;
         if (autoPlay) {
-          videoRef.current.play().catch((error) => {
-            console.error('Error playing video:', error);
-          });
+          // Autoplay no macOS/Safari requer muted para funcionar
+          // Se não estiver muted, tentar mutar automaticamente
+          if (!muted && videoRef.current.muted === false) {
+            videoRef.current.muted = true;
+          }
+          
+          videoRef.current
+            .play()
+            .then(() => {
+              console.log('✅ Autoplay iniciado com sucesso');
+            })
+            .catch((error) => {
+              // Autoplay foi bloqueado (política do navegador)
+              // Isso é esperado se o vídeo não estiver muted
+              console.warn(
+                '⚠️ Autoplay bloqueado. O usuário precisa interagir para iniciar o vídeo.',
+                error
+              );
+              // Não é um erro crítico - o usuário pode clicar para iniciar
+            });
         }
       } else if (videoRef.current && !srcObject) {
         // Limpar srcObject quando não fornecido
         videoRef.current.srcObject = null;
       }
-    }, [srcObject, autoPlay]);
+    }, [srcObject, autoPlay, muted]);
 
     return (
       <div className="absolute inset-0 z-10">
@@ -152,6 +169,10 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
             playsInline
             autoPlay={autoPlay}
             muted={muted}
+            // Nota sobre autoplay:
+            // - No macOS/Safari, autoplay só funciona se muted=true
+            // - Vídeos com áudio requerem interação do usuário para iniciar
+            // - playsInline é necessário para iOS/macOS
           />
 
           <BufferingOverlay isBuffering={isBuffering} />

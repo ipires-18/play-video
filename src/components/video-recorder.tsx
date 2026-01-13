@@ -33,6 +33,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   maxDurationSeconds = 180,
   allowReRecord = true,
   onRecordingComplete,
+  autoStart = false,
 }) => {
   const theme = getTheme(jobType);
   const [mimeType, setMimeType] = useState<string | null>(null);
@@ -40,6 +41,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   const [countdownValue, setCountdownValue] = useState(5);
   const [shouldStartCountdownAfterStream, setShouldStartCountdownAfterStream] =
     useState(false);
+  const autoStartAttemptedRef = React.useRef(false);
 
   // Hooks
   const {
@@ -173,21 +175,56 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     }
   }, [isRequesting, stream, status, setStatus]);
 
-  // Iniciar countdown automaticamente quando o stream estiver disponível após regravação
+  // Resetar flag quando autoStart mudar para false
+  useEffect(() => {
+    if (!autoStart) {
+      autoStartAttemptedRef.current = false;
+    }
+  }, [autoStart]);
+
+  // Iniciar stream automaticamente se autoStart for true
+  useEffect(() => {
+    if (autoStart && !stream && !isRequesting && !autoStartAttemptedRef.current) {
+      console.log('🚀 AutoStart ativado - iniciando stream...', {
+        autoStart,
+        hasStream: !!stream,
+        isRequesting,
+        status,
+      });
+      autoStartAttemptedRef.current = true;
+      startStream().catch((error) => {
+        console.error('Erro ao iniciar stream automaticamente:', error);
+        setError('Erro ao iniciar câmera automaticamente');
+        autoStartAttemptedRef.current = false; // Permitir tentar novamente em caso de erro
+      });
+    }
+  }, [autoStart, stream, isRequesting, startStream, status]);
+
+  // Iniciar countdown automaticamente quando o stream estiver disponível (autoStart ou regravação)
   useEffect(() => {
     if (
-      shouldStartCountdownAfterStream &&
+      (shouldStartCountdownAfterStream || autoStart) &&
       stream &&
-      status === RecorderStatus.IDLE
+      status === RecorderStatus.IDLE &&
+      !isRequesting
     ) {
+      console.log('⏱️ Stream disponível - iniciando countdown automático...', {
+        shouldStartCountdownAfterStream,
+        autoStart,
+        hasStream: !!stream,
+        status,
+        isRequesting,
+      });
       setActiveCountdown(5);
       setStatus(RecorderStatus.COUNTDOWN);
       setShouldStartCountdownAfterStream(false);
     }
   }, [
     shouldStartCountdownAfterStream,
+    autoStart,
     stream,
     status,
+    isRequesting,
     setStatus,
     setActiveCountdown,
   ]);

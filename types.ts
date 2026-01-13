@@ -51,4 +51,5 @@ export interface VideoRecorderProps {
   maxDurationSeconds?: number;
   allowReRecord?: boolean;
   onRecordingComplete?: (blob: Blob) => void;
+  autoStart?: boolean; // Se true, inicia stream e gravação automaticamente
 }

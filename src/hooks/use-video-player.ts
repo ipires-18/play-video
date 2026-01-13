@@ -32,7 +32,14 @@ export const useVideoPlayer = (): UseVideoPlayerReturn => {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        videoRef.current.play();
+        // Tentar iniciar a reprodução
+        // Se falhar (ex: autoplay bloqueado), o erro será silenciosamente ignorado
+        // pois o usuário já interagiu (clicou no botão)
+        videoRef.current.play().catch((error) => {
+          console.warn('Erro ao iniciar reprodução:', error);
+          // Não é necessário mostrar erro ao usuário aqui,
+          // pois ele já interagiu com o botão de play
+        });
       }
     }
   }, [isPlaying]);
