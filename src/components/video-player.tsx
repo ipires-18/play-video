@@ -28,9 +28,13 @@ import { cn } from '@foursales/components';
 export interface VideoPlayerRef {
   togglePlay: () => void;
   setCurrentTime: (time: number) => void;
+  setPlaybackRate: (rate: number) => void;
+  toggleFullscreen: () => void;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
+  playbackRate: number;
+  isFullscreen: boolean;
 }
 
 const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
@@ -90,9 +94,13 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     useImperativeHandle(ref, () => ({
       togglePlay,
       setCurrentTime,
+      setPlaybackRate: handlePlaybackRate,
+      toggleFullscreen,
       isPlaying,
       currentTime,
       duration,
+      playbackRate,
+      isFullscreen,
     }));
 
     // Notificar mudanças de estado
@@ -122,11 +130,11 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     }, [srcObject, autoPlay]);
 
     return (
-      <div className="relative w-full h-full bg-transparent flex flex-col p-4 md:p-8">
+      <div className="absolute inset-0 z-10">
         {/* Video Canvas Container */}
         <div
           ref={containerRef}
-          className="relative flex-1 rounded-2xl overflow-hidden shadow-lg bg-transparent"
+          className="relative flex-1 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden bg-transparent"
         >
           <VideoStyles />
 

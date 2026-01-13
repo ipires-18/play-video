@@ -11,7 +11,20 @@ import { getTheme } from '../helpers/theme';
 import { getSupportedMimeType } from '../helpers/codec-detection';
 import { isMediaRecorderSupported, isIOS } from '../helpers/device-detection';
 import { formatTime } from '../helpers/time';
-import { ProgressBar, PlayButton, VideoStyles, ControlBar } from './shared';
+import {
+  ProgressBar,
+  PlayButton,
+  VideoStyles,
+  ControlBar,
+  FinishButton,
+  ReRecordButton,
+  StatusIcon,
+  RecordButton,
+  StopButton,
+  TimeDisplay,
+  SpeedSelector,
+  FullscreenButton,
+} from './shared';
 import { CountdownOverlay } from './shared/countdown-overlay';
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
@@ -85,6 +98,42 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
 
   const toggleReviewPlay = () => {
     videoPlayerRef.current?.togglePlay();
+  };
+
+  // Estado para controles durante reviewing (sincronizado com VideoPlayer via ref)
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+
+  // Sincronizar estado do VideoPlayer durante reviewing
+  useEffect(() => {
+    if (
+      videoPlayerRef.current &&
+      (status === RecorderStatus.REVIEWING ||
+        status === RecorderStatus.COMPLETED)
+    ) {
+      const player = videoPlayerRef.current;
+      setIsFullscreen(player.isFullscreen);
+      setPlaybackRate(player.playbackRate);
+    }
+  }, [status, videoPlayerState.isPlaying, videoPlayerState.currentTime]);
+
+  const toggleFullscreen = () => {
+    if (videoPlayerRef.current) {
+      videoPlayerRef.current.toggleFullscreen();
+      // Atualizar estado local após toggle
+      setTimeout(() => {
+        if (videoPlayerRef.current) {
+          setIsFullscreen(videoPlayerRef.current.isFullscreen);
+        }
+      }, 100);
+    }
+  };
+
+  const handlePlaybackRate = (rate: number) => {
+    if (videoPlayerRef.current) {
+      videoPlayerRef.current.setPlaybackRate(rate);
+      setPlaybackRate(rate);
+    }
   };
 
   // Detectar codec suportado na montagem
@@ -233,9 +282,9 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full bg-transparent flex flex-col p-4 md:p-8">
+    <div className="relative w-full h-full bg-transparent flex flex-col p-2 sm:p-4 md:p-6 lg:p-8">
       {/* Video Canvas Container */}
-      <div className="relative flex-1 rounded-2xl overflow-hidden shadow-lg bg-transparent">
+      <div className="relative flex-1 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden bg-transparent">
         <VideoStyles />
 
         {/* Vídeo de preview (stream ao vivo) usando VideoPlayer */}
@@ -306,44 +355,61 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         )}
       </div>
 
-      {/* Themed Control Bar */}
+      {/* Control Bar */}
       <ControlBar
         theme={theme}
         leftContent={
           <>
-            <div
-              className={`w-5 h-5 rounded-full border-2 border-white shadow-sm flex items-center justify-center flex-shrink-0 ${
-                status === RecorderStatus.RECORDING
-                  ? 'bg-rose-600 animate-pulse'
-                  : 'bg-slate-300'
-              }`}
-            >
-              <div className="w-2 h-2 bg-white rounded-full" />
-            </div>
-
-            {status === RecorderStatus.REVIEWING && (
-              <PlayButton
-                isPlaying={isPreviewPlaying}
-                onClick={toggleReviewPlay}
-              />
+            {/* Idle: PlayButton + "Gravar" (primeiro ícone) */}
+            {status === RecorderStatus.IDLE && stream && (
+              <>
+                <PlayButton isPlaying={false} onClick={startCountdown} />
+                <span className="text-wkp-primary-dark font-semibold">
+                  Gravar
+                </span>
+              </>
             )}
 
-            <span className="text-slate-700 font-medium whitespace-nowrap tabular-nums">
-              {status === RecorderStatus.REVIEWING ||
-              status === RecorderStatus.COMPLETED
-                ? `${formatTime(Math.floor(videoCurrentTime))} de ${formatTime(Math.floor(videoDuration))}`
-                : `${formatTime(elapsedTime)} de ${formatTime(maxDurationSeconds)}`}
-            </span>
+            {/* Recording: Regravar + StatusIcon + TimeDisplay */}
+            {status === RecorderStatus.RECORDING && (
+              <>
+                {allowReRecord && (
+                  <ReRecordButton onClick={handleReRecord} />
+                )}
+                <StatusIcon status={status} />
+                <TimeDisplay
+                  currentTime={elapsedTime}
+                  duration={maxDurationSeconds}
+                />
+              </>
+            )}
 
-            {allowReRecord && status === RecorderStatus.REVIEWING && (
-              <button
-                onClick={handleReRecord}
-                className="flex items-center space-x-2 text-slate-500 hover:text-slate-800 text-sm font-semibold transition-colors flex-shrink-0"
-                aria-label="Regravar vídeo"
-              >
-                <Icons.ReRecord className="w-[18px] h-[18px] text-[#007AD3]" />
-                <span>Regravar</span>
-              </button>
+            {/* Reviewing: Regravar (primeiro) + PlayButton + TimeDisplay */}
+            {status === RecorderStatus.REVIEWING && (
+              <>
+                {allowReRecord && (
+                  <ReRecordButton onClick={handleReRecord} />
+                )}
+                <PlayButton
+                  isPlaying={isPreviewPlaying}
+                  onClick={toggleReviewPlay}
+                />
+                <TimeDisplay
+                  currentTime={videoCurrentTime}
+                  duration={videoDuration}
+                />
+              </>
+            )}
+
+            {/* Completed: StatusIcon + TimeDisplay */}
+            {status === RecorderStatus.COMPLETED && (
+              <>
+                <StatusIcon status={status} />
+                <TimeDisplay
+                  currentTime={videoCurrentTime}
+                  duration={videoDuration}
+                />
+              </>
             )}
           </>
         }
@@ -361,37 +427,26 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         }
         rightContent={
           <>
-            {status === RecorderStatus.IDLE && stream && (
-              <button
-                onClick={startCountdown}
-                className="flex items-center space-x-2 text-slate-700 hover:text-indigo-600 transition-colors font-semibold"
-              >
-                <Icons.Play className="w-5 h-5" />
-                <span>Gravar</span>
-              </button>
-            )}
-
+            {/* Recording: Concluir */}
             {status === RecorderStatus.RECORDING && (
-              <button
-                onClick={stopRecording}
-                className="flex items-center space-x-2 text-slate-500 hover:text-slate-800 transition-colors font-semibold"
-              >
-                <Icons.StopSquare className="w-6 h-6" />
-                <span>Concluir</span>
-              </button>
+              <StopButton onClick={stopRecording} />
             )}
 
+            {/* Reviewing: SpeedSelector + FullscreenButton */}
             {status === RecorderStatus.REVIEWING && (
-              <button
-                onClick={handleFinish}
-                className="flex items-center space-x-2 px-4 py-1.5 bg-[#E6F0E9] text-[#007AD3] rounded-full text-sm font-bold shadow-sm hover:opacity-90 transition-opacity"
-                aria-label="Concluir gravação"
-              >
-                <Icons.Checkbox className="w-[18px] h-[18px] text-[#007AD3]" />
-                <span>Concluir</span>
-              </button>
+              <>
+                <SpeedSelector
+                  playbackRate={playbackRate}
+                  onRateChange={handlePlaybackRate}
+                />
+                <FullscreenButton
+                  isFullscreen={isFullscreen}
+                  onClick={toggleFullscreen}
+                />
+              </>
             )}
 
+            {/* Completed: Mensagem de enviado */}
             {status === RecorderStatus.COMPLETED && (
               <span className="text-emerald-600 font-bold text-sm">
                 ✓ Enviado

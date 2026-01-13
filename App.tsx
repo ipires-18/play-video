@@ -45,7 +45,7 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        <main className="aspect-video w-full bg-black relative">
+        <main className="aspect-video w-full bg-transparent relative">
           {mode === 'view' ? (
             <VideoPlayer
               src={videoSrc}
