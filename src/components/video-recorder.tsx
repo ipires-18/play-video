@@ -26,6 +26,7 @@ import {
   FullscreenButton,
 } from './shared';
 import { CountdownOverlay } from './shared/countdown-overlay';
+import { Button } from '@foursales/components';
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
   jobType,
@@ -326,7 +327,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 text-white p-6 text-center">
             <button
               onClick={startStream}
-              className="px-8 py-3 bg-white text-black rounded-full font-bold shadow-xl hover:bg-slate-50 transition-all transform hover:scale-105"
+              className="px-8 py-3 bg-white text-black rounded-full font-bold shadow-xl hover:bg-slate-50 transition-all transform hover:scale-105 cursor-pointer"
             >
               Ativar Câmera
             </button>
@@ -355,106 +356,110 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         )}
       </div>
 
-      {/* Control Bar */}
-      <ControlBar
-        theme={theme}
-        leftContent={
-          <>
-            {/* Idle: PlayButton + "Gravar" (primeiro ícone) */}
-            {status === RecorderStatus.IDLE && stream && (
-              <>
-                <PlayButton isPlaying={false} onClick={startCountdown} />
-                <span className="text-wkp-primary-dark font-semibold">
-                  Gravar
-                </span>
-              </>
-            )}
+      {/* Botão "Iniciar a gravação" quando câmera está habilitada (IDLE com stream) */}
+      {status === RecorderStatus.IDLE && stream && (
+        <div className="mt-6 flex justify-center">
+          <Button onClick={startCountdown} variant="secondary">
+            Iniciar a gravação
+          </Button>
+        </div>
+      )}
 
-            {/* Recording: Regravar + StatusIcon + TimeDisplay */}
-            {status === RecorderStatus.RECORDING && (
-              <>
-                {allowReRecord && (
-                  <ReRecordButton onClick={handleReRecord} />
-                )}
-                <StatusIcon status={status} />
-                <TimeDisplay
-                  currentTime={elapsedTime}
-                  duration={maxDurationSeconds}
-                />
-              </>
-            )}
-
-            {/* Reviewing: Regravar (primeiro) + PlayButton + TimeDisplay */}
-            {status === RecorderStatus.REVIEWING && (
-              <>
-                {allowReRecord && (
-                  <ReRecordButton onClick={handleReRecord} />
-                )}
-                <PlayButton
-                  isPlaying={isPreviewPlaying}
-                  onClick={toggleReviewPlay}
-                />
-                <TimeDisplay
-                  currentTime={videoCurrentTime}
-                  duration={videoDuration}
-                />
-              </>
-            )}
-
-            {/* Completed: StatusIcon + TimeDisplay */}
-            {status === RecorderStatus.COMPLETED && (
-              <>
-                <StatusIcon status={status} />
-                <TimeDisplay
-                  currentTime={videoCurrentTime}
-                  duration={videoDuration}
-                />
-              </>
-            )}
-          </>
-        }
-        centerContent={
-          <ProgressBar
-            progressPercentage={progressPercentage}
+      {/* Control Bar - Oculto durante ativação da câmera, countdown e quando IDLE com stream */}
+      {status !== RecorderStatus.REQUESTING &&
+        status !== RecorderStatus.COUNTDOWN &&
+        stream &&
+        status !== RecorderStatus.IDLE && (
+          <ControlBar
             theme={theme}
-            onClick={
-              status === RecorderStatus.REVIEWING ||
-              status === RecorderStatus.COMPLETED
-                ? handleProgressClick
-                : undefined
+            leftContent={
+              <>
+                {/* Recording: Regravar + StatusIcon + TimeDisplay */}
+                {status === RecorderStatus.RECORDING && (
+                  <>
+                    {allowReRecord && (
+                      <ReRecordButton onClick={handleReRecord} />
+                    )}
+                    <StatusIcon status={status} />
+                    <TimeDisplay
+                      currentTime={elapsedTime}
+                      duration={maxDurationSeconds}
+                    />
+                  </>
+                )}
+
+                {/* Reviewing: Regravar (primeiro) + PlayButton + TimeDisplay */}
+                {status === RecorderStatus.REVIEWING && (
+                  <>
+                    {allowReRecord && (
+                      <ReRecordButton onClick={handleReRecord} />
+                    )}
+                    <PlayButton
+                      isPlaying={isPreviewPlaying}
+                      onClick={toggleReviewPlay}
+                    />
+                    <TimeDisplay
+                      currentTime={videoCurrentTime}
+                      duration={videoDuration}
+                    />
+                  </>
+                )}
+
+                {/* Completed: StatusIcon + TimeDisplay */}
+                {status === RecorderStatus.COMPLETED && (
+                  <>
+                    <StatusIcon status={status} />
+                    <TimeDisplay
+                      currentTime={videoCurrentTime}
+                      duration={videoDuration}
+                    />
+                  </>
+                )}
+              </>
+            }
+            centerContent={
+              <ProgressBar
+                progressPercentage={progressPercentage}
+                theme={theme}
+                onClick={
+                  status === RecorderStatus.REVIEWING ||
+                  status === RecorderStatus.COMPLETED
+                    ? handleProgressClick
+                    : undefined
+                }
+              />
+            }
+            rightContent={
+              <>
+                {/* Recording: Concluir */}
+                {status === RecorderStatus.RECORDING && (
+                  <StopButton onClick={stopRecording} />
+                )}
+
+                {/* Reviewing: SpeedSelector + FullscreenButton */}
+                {status === RecorderStatus.REVIEWING && (
+                  <>
+                    <SpeedSelector
+                      playbackRate={playbackRate}
+                      onRateChange={handlePlaybackRate}
+                    />
+                    <FullscreenButton
+                      isFullscreen={isFullscreen}
+                      onClick={toggleFullscreen}
+                    />
+                  </>
+                )}
+
+                {/* Completed: Mensagem de enviado */}
+                {status === RecorderStatus.COMPLETED && (
+                  <span className="text-emerald-600 font-bold text-sm">
+                    ✓ Enviado
+                  </span>
+                )}
+              </>
             }
           />
-        }
-        rightContent={
-          <>
-            {/* Recording: Concluir */}
-            {status === RecorderStatus.RECORDING && (
-              <StopButton onClick={stopRecording} />
-            )}
-
-            {/* Reviewing: SpeedSelector + FullscreenButton */}
-            {status === RecorderStatus.REVIEWING && (
-              <>
-                <SpeedSelector
-                  playbackRate={playbackRate}
-                  onRateChange={handlePlaybackRate}
-                />
-                <FullscreenButton
-                  isFullscreen={isFullscreen}
-                  onClick={toggleFullscreen}
-                />
-              </>
-            )}
-
-            {/* Completed: Mensagem de enviado */}
-            {status === RecorderStatus.COMPLETED && (
-              <span className="text-emerald-600 font-bold text-sm">
-                ✓ Enviado
-              </span>
-            )}
-          </>
-        }
-      />
+        )}
     </div>
   );
 };

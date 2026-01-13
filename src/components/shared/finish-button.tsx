@@ -1,6 +1,6 @@
 import React from 'react';
 import Icons from '../icons';
-import { cn } from '@foursales/components';
+import { cn, Typography } from '@foursales/components';
 
 export interface FinishButtonProps {
   onClick: () => void;
@@ -19,14 +19,21 @@ export const FinishButton: React.FC<FinishButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      className={cn(
-        'flex items-center space-x-2 px-4 py-1.5 bg-[#E6F0E9] text-wkp-primary-dark rounded-full text-sm font-bold shadow-sm hover:opacity-90 transition-opacity cursor-pointer',
-        className
-      )}
-      aria-label={ariaLabel}
+      className="flex items-center gap-2 transition-opacity cursor-pointer"
     >
-      <Icons.Checkbox className="w-[18px] h-[18px] text-wkp-primary-dark" />
-      <span>Concluir</span>
+      <Icons.Checkbox
+        className={cn('w-[18px] h-[18px] text-wkp-primary-dark', className)}
+      />
+      <Typography
+        className={cn(
+          'whitespace-nowrap tabular-nums text-wkp-primary-dark',
+          className
+        )}
+        variant="body-medium-regular"
+        aria-label={ariaLabel}
+      >
+        Concluir
+      </Typography>
     </button>
   );
 };
