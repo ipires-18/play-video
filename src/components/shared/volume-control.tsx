@@ -85,12 +85,13 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
           'h-4.5 w-4.5 text-wkp-primary-dark hover:text-wkp-primary-darker transition-colors cursor-pointer shrink-0',
           className
         )}
+        style={{ cursor: 'pointer' }}
         aria-label={isMuted ? 'Ativar som' : 'Silenciar'}
       >
         {isMuted || volume === 0 ? (
-          <Icons.Mute className="h-4.5 w-4.5" />
+          <Icons.Mute className="h-4.5 w-4.5 cursor-pointer" />
         ) : (
-          <Icons.Volume className="h-4.5 w-4.5" />
+          <Icons.Volume className="h-4.5 w-4.5 cursor-pointer" />
         )}
       </button>
       {isHovered && (

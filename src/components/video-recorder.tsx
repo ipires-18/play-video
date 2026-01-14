@@ -24,6 +24,7 @@ import {
   TimeDisplay,
   SpeedSelector,
   FullscreenButton,
+  FullscreenControlBar,
 } from './shared';
 import { CountdownOverlay } from './shared/countdown-overlay';
 import { Button } from '@foursales/components';
@@ -106,6 +107,8 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   // Estado para controles durante reviewing (sincronizado com VideoPlayer via ref)
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
 
   // Sincronizar estado do VideoPlayer durante reviewing
   useEffect(() => {
@@ -119,6 +122,30 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       setPlaybackRate(player.playbackRate);
     }
   }, [status, videoPlayerState.isPlaying, videoPlayerState.currentTime]);
+
+  // Listener para mudanças de fullscreen em tempo real
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setTimeout(() => {
+        if (videoPlayerRef.current) {
+          setIsFullscreen(videoPlayerRef.current.isFullscreen);
+        } else {
+          setIsFullscreen(!!document.fullscreenElement);
+        }
+      }, 50);
+    };
+
+    if (videoPlayerRef.current) {
+      setIsFullscreen(videoPlayerRef.current.isFullscreen);
+    } else {
+      setIsFullscreen(!!document.fullscreenElement);
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   const toggleFullscreen = () => {
     if (videoPlayerRef.current) {
@@ -137,6 +164,19 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       videoPlayerRef.current.setPlaybackRate(rate);
       setPlaybackRate(rate);
     }
+  };
+
+  // Handlers para volume
+  const handleToggleMute = () => {
+    setIsMuted(!isMuted);
+    // TODO: Implementar mute no VideoPlayer se necessário
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const vol = parseFloat(e.target.value);
+    setVolume(vol);
+    setIsMuted(vol === 0);
+    // TODO: Implementar volume no VideoPlayer se necessário
   };
 
   // Detectar codec suportado na montagem
@@ -184,7 +224,12 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
 
   // Iniciar stream automaticamente se autoStart for true
   useEffect(() => {
-    if (autoStart && !stream && !isRequesting && !autoStartAttemptedRef.current) {
+    if (
+      autoStart &&
+      !stream &&
+      !isRequesting &&
+      !autoStartAttemptedRef.current
+    ) {
       console.log('🚀 AutoStart ativado - iniciando stream...', {
         autoStart,
         hasStream: !!stream,
@@ -320,9 +365,25 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full bg-transparent flex flex-col p-2 sm:p-4 md:p-6 lg:p-8">
+    <div
+      className={`relative w-full h-full bg-transparent flex flex-col ${
+        isFullscreen &&
+        (status === RecorderStatus.REVIEWING ||
+          status === RecorderStatus.COMPLETED)
+          ? 'p-0'
+          : 'p-2 sm:p-4 md:p-6 lg:p-8'
+      }`}
+    >
       {/* Video Canvas Container */}
-      <div className="relative flex-1 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden bg-transparent">
+      <div
+        className={`relative flex-1 overflow-hidden bg-transparent ${
+          isFullscreen &&
+          (status === RecorderStatus.REVIEWING ||
+            status === RecorderStatus.COMPLETED)
+            ? 'rounded-none'
+            : 'rounded-lg sm:rounded-xl md:rounded-2xl'
+        }`}
+      >
         <VideoStyles />
 
         {/* Vídeo de preview (stream ao vivo) usando VideoPlayer */}
@@ -350,6 +411,58 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
                 jobType={jobType}
                 hideControls={true}
                 onStateChange={setVideoPlayerState}
+                bigPlayButtonRightButton={
+                  status === RecorderStatus.REVIEWING &&
+                  !isPreviewPlaying &&
+                  allowReRecord &&
+                  !isFullscreen ? (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReRecord();
+                      }}
+                      className="w-20 h-20 rounded-full flex items-center justify-center transition-opacity hover:opacity-90 bg-wkp-primary-lighter/70"
+                    >
+                      <Icons.ReRecord className="w-10 h-10 text-wkp-primary-dark fill-wkp-primary-dark" />
+                    </button>
+                  ) : undefined
+                }
+                customFullscreenControlBar={
+                  isFullscreen &&
+                  (status === RecorderStatus.REVIEWING ||
+                    status === RecorderStatus.COMPLETED) ? (
+                    <FullscreenControlBar
+                      theme={theme}
+                      jobType={jobType}
+                      isPlaying={isPreviewPlaying}
+                      isMuted={isMuted}
+                      volume={volume}
+                      currentTime={videoCurrentTime}
+                      duration={videoDuration}
+                      progressPercentage={
+                        videoDuration > 0
+                          ? (videoCurrentTime / videoDuration) * 100
+                          : 0
+                      }
+                      playbackRate={playbackRate}
+                      isFullscreen={isFullscreen}
+                      onTogglePlay={toggleReviewPlay}
+                      onToggleMute={handleToggleMute}
+                      onVolumeChange={handleVolumeChange}
+                      onProgressClick={handleProgressClick}
+                      onPlaybackRateChange={handlePlaybackRate}
+                      onToggleFullscreen={toggleFullscreen}
+                      showReRecordButton={
+                        status === RecorderStatus.REVIEWING && allowReRecord
+                      }
+                      onReRecord={
+                        status === RecorderStatus.REVIEWING && allowReRecord
+                          ? handleReRecord
+                          : undefined
+                      }
+                    />
+                  ) : undefined
+                }
               />
             </div>
           )}
@@ -402,11 +515,16 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         </div>
       )}
 
-      {/* Control Bar - Oculto durante ativação da câmera, countdown e quando IDLE com stream */}
+      {/* Control Bar - Oculto durante ativação da câmera, countdown, quando IDLE com stream, e em fullscreen */}
       {status !== RecorderStatus.REQUESTING &&
         status !== RecorderStatus.COUNTDOWN &&
         stream &&
-        status !== RecorderStatus.IDLE && (
+        status !== RecorderStatus.IDLE &&
+        !(
+          isFullscreen &&
+          (status === RecorderStatus.REVIEWING ||
+            status === RecorderStatus.COMPLETED)
+        ) && (
           <ControlBar
             theme={theme}
             leftContent={

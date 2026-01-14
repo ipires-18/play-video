@@ -1,3 +1,5 @@
+import React from 'react';
+
 export enum JobType {
   SECRET = 'secret',
   COMPANY = 'company',
@@ -33,6 +35,8 @@ export interface VideoPlayerProps {
   className?: string;
   autoPlay?: boolean;
   muted?: boolean;
+  bigPlayButtonRightButton?: React.ReactNode;
+  customFullscreenControlBar?: React.ReactNode;
 }
 
 export interface PlayerState {

@@ -38,6 +38,7 @@ export const SpeedSelector: React.FC<SpeedSelectorProps> = ({
           'flex items-center space-x-1 px-2 py-1 bg-transparent hover:bg-transparent rounded text-xs font-semibold transition-colors text-wkp-primary-dark hover:text-wkp-primary-darker cursor-pointer',
           className
         )}
+        style={{ cursor: 'pointer' }}
         aria-label="Velocidade de reprodução"
         aria-expanded={showMenu}
       >
@@ -61,6 +62,7 @@ export const SpeedSelector: React.FC<SpeedSelectorProps> = ({
                 setShowMenu(false);
               }}
               className="px-3 py-1.5 text-xs text-left rounded hover:bg-slate-100 transition-colors cursor-pointer"
+              style={{ cursor: 'pointer' }}
             >
               <Typography
                 className={cn(

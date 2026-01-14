@@ -29,3 +29,5 @@ export { RecordButton } from './record-button';
 export type { RecordButtonProps } from './record-button';
 export { StopButton } from './stop-button';
 export type { StopButtonProps } from './stop-button';
+export { FullscreenControlBar } from './fullscreen-control-bar';
+export type { FullscreenControlBarProps } from './fullscreen-control-bar';

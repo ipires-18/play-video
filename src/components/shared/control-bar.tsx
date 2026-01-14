@@ -26,17 +26,21 @@ export const ControlBar: React.FC<ControlBarProps> = ({
       >
         {/* Left Side */}
         {leftContent && (
-          <div className="flex items-center space-x-3 shrink-0 px-2">
+          <div className="flex items-center space-x-3 shrink-0 px-2 pointer-events-auto cursor-pointer">
             {leftContent}
           </div>
         )}
 
         {/* Center */}
-        {centerContent && <div className="flex-1 min-w-0">{centerContent}</div>}
+        {centerContent && (
+          <div className="flex-1 min-w-0 pointer-events-auto">
+            {centerContent}
+          </div>
+        )}
 
         {/* Right Side */}
         {rightContent && (
-          <div className="flex items-center space-x-3 ml-4 shrink-0">
+          <div className="flex items-center space-x-3 ml-4 shrink-0 pointer-events-auto cursor-pointer">
             {rightContent}
           </div>
         )}

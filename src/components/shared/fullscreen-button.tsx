@@ -23,12 +23,13 @@ export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
         'h-4.5 w-4.5 text-wkp-primary-dark hover:text-wkp-primary-darker transition-colors cursor-pointer',
         className
       )}
+      style={{ cursor: 'pointer' }}
       aria-label={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
     >
       {isFullscreen ? (
-        <Icons.Minimize className="h-4.5 w-4.5" />
+        <Icons.Minimize className="h-4.5 w-4.5 cursor-pointer" />
       ) : (
-        <Icons.Maximize className="h-4.5 w-4.5" />
+        <Icons.Maximize className="h-4.5 w-4.5 cursor-pointer" />
       )}
     </button>
   );

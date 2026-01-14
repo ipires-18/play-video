@@ -25,14 +25,15 @@ export const PlayButton: React.FC<PlayButtonProps> = ({
         'h-4.5 w-4.5 text-wkp-primary-dark hover:text-wkp-primary-darker transition-colors cursor-pointer',
         className
       )}
+      style={{ cursor: 'pointer' }}
       aria-label={
         ariaLabel || (isPlaying ? 'Pausar vídeo' : 'Reproduzir vídeo')
       }
     >
       {isPlaying ? (
-        <Icons.Pause className="h-4.5 w-4.5" />
+        <Icons.Pause className="h-4.5 w-4.5 cursor-pointer" />
       ) : (
-        <Icons.Play className="h-4.5 w-4.5" />
+        <Icons.Play className="h-4.5 w-4.5 cursor-pointer" />
       )}
     </button>
   );

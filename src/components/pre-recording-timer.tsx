@@ -47,7 +47,7 @@ export const PreRecordingTimer: React.FC<PreRecordingTimerProps> = ({
     ((durationSeconds - timeRemaining) / durationSeconds) * 100;
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div className="relative w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       {/* Timer Display */}
       <div className="relative z-10 flex flex-col items-center justify-center space-y-8">
         {/* Circular Progress */}

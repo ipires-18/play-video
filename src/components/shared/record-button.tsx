@@ -23,9 +23,10 @@ export const RecordButton: React.FC<RecordButtonProps> = ({
         'flex items-center space-x-2 text-wkp-primary-dark hover:text-wkp-primary-darker transition-colors font-semibold cursor-pointer',
         className
       )}
+      style={{ cursor: 'pointer' }}
       aria-label={ariaLabel}
     >
-      <Icons.Play className="h-4.5 w-4.5" />
+      <Icons.Play className="h-4.5 w-4.5 cursor-pointer" />
       <span>Gravar</span>
     </button>
   );

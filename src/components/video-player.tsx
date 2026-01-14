@@ -22,6 +22,7 @@ import {
   BigPlayButton,
   BufferingOverlay,
   ControlBar,
+  FullscreenControlBar,
 } from './shared';
 import { cn } from '@foursales/components';
 
@@ -50,6 +51,8 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       className = 'w-full h-full object-contain',
       autoPlay = false,
       muted = false,
+      bigPlayButtonRightButton,
+      customFullscreenControlBar,
     },
     ref
   ) => {
@@ -124,7 +127,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
           if (!muted && videoRef.current.muted === false) {
             videoRef.current.muted = true;
           }
-          
+
           videoRef.current
             .play()
             .then(() => {
@@ -151,7 +154,12 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
         {/* Video Canvas Container */}
         <div
           ref={containerRef}
-          className="relative flex-1 rounded-lg sm:rounded-xl md:rounded-2xl overflow-hidden bg-transparent"
+          className={cn(
+            'relative flex-1 overflow-hidden bg-transparent',
+            isFullscreen
+              ? 'rounded-none'
+              : 'rounded-lg sm:rounded-xl md:rounded-2xl'
+          )}
         >
           <VideoStyles />
 
@@ -187,10 +195,36 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
               }}
             />
           )}
+
+          {/* Control Bar DENTRO do vídeo - apenas em fullscreen */}
+          {isFullscreen && customFullscreenControlBar
+            ? customFullscreenControlBar
+            : !hideControls &&
+              showControls &&
+              isFullscreen && (
+                <FullscreenControlBar
+                  theme={theme}
+                  jobType={jobType}
+                  isPlaying={isPlaying}
+                  isMuted={isMuted}
+                  volume={volume}
+                  currentTime={currentTime}
+                  duration={duration}
+                  progressPercentage={progressPercentage}
+                  playbackRate={playbackRate}
+                  isFullscreen={isFullscreen}
+                  onTogglePlay={togglePlay}
+                  onToggleMute={toggleMute}
+                  onVolumeChange={handleVolumeChange}
+                  onProgressClick={handleProgressClick}
+                  onPlaybackRateChange={handlePlaybackRate}
+                  onToggleFullscreen={toggleFullscreen}
+                />
+              )}
         </div>
 
-        {/* Control Bar */}
-        {!hideControls && showControls && (
+        {/* Control Bar FORA do vídeo - apenas quando NÃO está em fullscreen */}
+        {!hideControls && showControls && !isFullscreen && (
           <ControlBar
             theme={theme}
             leftContent={
