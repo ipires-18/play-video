@@ -2,3 +2,58 @@
 @import '../node_modules/@foursales/components/build/index.css';
 @import '../node_modules/@foursales/components/build/theme/theme.css';
 @import '../node_modules/@foursales/components/build/theme/global-workpass.css';
+
+/* 
+ * CSS Variables para cores customizáveis dos controles de vídeo
+ * 
+ * NOTA: As CSS variables só são aplicadas quando a prop `colors` é fornecida
+ * nos componentes VideoRecorder ou VideoPlayer via style inline.
+ * 
+ * Quando `colors` não é fornecido, o componente usa as cores nativas
+ * do sistema de design (classes wkp-primary-* do Tailwind).
+ * 
+ * As regras abaixo aplicam as CSS variables apenas quando elas estão definidas
+ * no elemento ou em um ancestral, permitindo que as classes Tailwind nativas
+ * funcionem normalmente quando não há cores customizadas.
+ */
+
+/* Aplicar cores customizadas usando CSS variables (apenas quando definidas) */
+[style*="--video-control-bar-bg"] .bg-wkp-primary-lighter {
+  background-color: var(--video-control-bar-bg) !important;
+}
+
+[style*="--video-control-bar-bg-70"] .bg-wkp-primary-lighter\/70 {
+  background-color: var(--video-control-bar-bg-70) !important;
+}
+
+[style*="--video-control-bar-bg-90"] .bg-wkp-primary-lighter\/90 {
+  background-color: var(--video-control-bar-bg-90) !important;
+}
+
+[style*="--video-control-color"] .text-wkp-primary-dark {
+  color: var(--video-control-color) !important;
+}
+
+[style*="--video-control-color"] .fill-wkp-primary-dark {
+  fill: var(--video-control-color) !important;
+}
+
+[style*="--video-progress-fill"] .bg-wkp-primary-dark {
+  background-color: var(--video-progress-fill) !important;
+}
+
+[style*="--video-control-color-hover"] .text-wkp-primary-darker {
+  color: var(--video-control-color-hover) !important;
+}
+
+[style*="--video-control-color-hover"] .group-hover\:text-wkp-primary-darker:hover {
+  color: var(--video-control-color-hover) !important;
+}
+
+[style*="--video-control-color-hover"] .hover\:text-wkp-primary-darker:hover {
+  color: var(--video-control-color-hover) !important;
+}
+
+[style*="--video-progress-bg"] .bg-wkp-gray-300 {
+  background-color: var(--video-progress-bg) !important;
+}

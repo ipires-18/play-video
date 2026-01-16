@@ -11,6 +11,7 @@ import { useFullscreen } from '../hooks/use-fullscreen';
 import { useVolume } from '../hooks/use-volume';
 import { usePlaybackRate } from '../hooks/use-playback-rate';
 import { getTheme } from '../helpers/theme';
+import { getControlColorsStyle } from '../helpers/colors';
 import {
   ProgressBar,
   PlayButton,
@@ -53,11 +54,13 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
       muted = false,
       bigPlayButtonRightButton,
       customFullscreenControlBar,
+      colors,
     },
     ref
   ) => {
     const theme = getTheme(jobType);
     const [showControls, setShowControls] = useState(!showControlsOnPlay);
+    const controlColorsStyle = getControlColorsStyle(colors);
 
     // Hooks
     const {
@@ -150,7 +153,10 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
     }, [srcObject, autoPlay, muted]);
 
     return (
-      <div className="absolute inset-0 z-10">
+      <div
+        className="absolute inset-0 z-10"
+        style={colors ? controlColorsStyle : undefined}
+      >
         {/* Video Canvas Container */}
         <div
           ref={containerRef}
@@ -204,7 +210,6 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(
               isFullscreen && (
                 <FullscreenControlBar
                   theme={theme}
-                  jobType={jobType}
                   isPlaying={isPlaying}
                   isMuted={isMuted}
                   volume={volume}

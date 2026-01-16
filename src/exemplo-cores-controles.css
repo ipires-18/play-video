@@ -1,0 +1,204 @@
+/**
+ * EXEMPLO DE PERSONALIZAÇÃO DE CORES DOS CONTROLES DE VÍDEO
+ * 
+ * Este arquivo mostra como personalizar as cores dos controles de vídeo.
+ * Para usar este exemplo, copie as regras CSS desejadas para o arquivo index.css
+ * ou importe este arquivo no index.css.
+ * 
+ * CORES ATUAIS APLICADAS:
+ * - Fundo dos controles: Roxo claro (#E9D5FF)
+ * - Controles individuais: Roxo forte (#7C3AED)
+ * - Hover: Roxo mais escuro (#6D28D9)
+ */
+
+/* ============================================
+   OPÇÃO 1: CORES ROXAS (ATUAL)
+   ============================================ */
+/*
+.bg-wkp-primary-lighter {
+  background-color: #E9D5FF !important;
+}
+
+.bg-wkp-primary-lighter\/70 {
+  background-color: rgba(233, 213, 255, 0.7) !important;
+}
+
+.bg-wkp-primary-lighter\/90 {
+  background-color: rgba(233, 213, 255, 0.9) !important;
+}
+
+.text-wkp-primary-dark {
+  color: #7C3AED !important;
+}
+
+.fill-wkp-primary-dark {
+  fill: #7C3AED !important;
+}
+
+.bg-wkp-primary-dark {
+  background-color: #7C3AED !important;
+}
+
+.text-wkp-primary-darker {
+  color: #6D28D9 !important;
+}
+
+.group-hover\:text-wkp-primary-darker:hover {
+  color: #6D28D9 !important;
+}
+
+.hover\:text-wkp-primary-darker:hover {
+  color: #6D28D9 !important;
+}
+*/
+
+/* ============================================
+   OPÇÃO 2: CORES AZUIS
+   ============================================ */
+/*
+.bg-wkp-primary-lighter {
+  background-color: #DBEAFE !important;
+}
+
+.bg-wkp-primary-lighter\/70 {
+  background-color: rgba(219, 234, 254, 0.7) !important;
+}
+
+.bg-wkp-primary-lighter\/90 {
+  background-color: rgba(219, 234, 254, 0.9) !important;
+}
+
+.text-wkp-primary-dark {
+  color: #2563EB !important;
+}
+
+.fill-wkp-primary-dark {
+  fill: #2563EB !important;
+}
+
+.bg-wkp-primary-dark {
+  background-color: #2563EB !important;
+}
+
+.text-wkp-primary-darker {
+  color: #1D4ED8 !important;
+}
+
+.group-hover\:text-wkp-primary-darker:hover {
+  color: #1D4ED8 !important;
+}
+
+.hover\:text-wkp-primary-darker:hover {
+  color: #1D4ED8 !important;
+}
+*/
+
+/* ============================================
+   OPÇÃO 3: CORES VERDES
+   ============================================ */
+/*
+.bg-wkp-primary-lighter {
+  background-color: #D1FAE5 !important;
+}
+
+.bg-wkp-primary-lighter\/70 {
+  background-color: rgba(209, 250, 229, 0.7) !important;
+}
+
+.bg-wkp-primary-lighter\/90 {
+  background-color: rgba(209, 250, 229, 0.9) !important;
+}
+
+.text-wkp-primary-dark {
+  color: #10B981 !important;
+}
+
+.fill-wkp-primary-dark {
+  fill: #10B981 !important;
+}
+
+.bg-wkp-primary-dark {
+  background-color: #10B981 !important;
+}
+
+.text-wkp-primary-darker {
+  color: #059669 !important;
+}
+
+.group-hover\:text-wkp-primary-darker:hover {
+  color: #059669 !important;
+}
+
+.hover\:text-wkp-primary-darker:hover {
+  color: #059669 !important;
+}
+*/
+
+/* ============================================
+   OPÇÃO 4: CORES ROSAS
+   ============================================ */
+/*
+.bg-wkp-primary-lighter {
+  background-color: #FCE7F3 !important;
+}
+
+.bg-wkp-primary-lighter\/70 {
+  background-color: rgba(252, 231, 243, 0.7) !important;
+}
+
+.bg-wkp-primary-lighter\/90 {
+  background-color: rgba(252, 231, 243, 0.9) !important;
+}
+
+.text-wkp-primary-dark {
+  color: #EC4899 !important;
+}
+
+.fill-wkp-primary-dark {
+  fill: #EC4899 !important;
+}
+
+.bg-wkp-primary-dark {
+  background-color: #EC4899 !important;
+}
+
+.text-wkp-primary-darker {
+  color: #DB2777 !important;
+}
+
+.group-hover\:text-wkp-primary-darker:hover {
+  color: #DB2777 !important;
+}
+
+.hover\:text-wkp-primary-darker:hover {
+  color: #DB2777 !important;
+}
+*/
+
+/* ============================================
+   PERSONALIZAÇÃO AVANÇADA
+   ============================================ */
+/* 
+ * Você também pode personalizar outras cores relacionadas:
+ */
+
+/* Cor da barra de progresso de fundo */
+/*
+.bg-wkp-gray-300 {
+  background-color: #D1D5DB !important;
+}
+*/
+
+/* Cor do texto de tempo */
+/*
+.text-wkp-primary-dark {
+  color: #7C3AED !important;
+}
+*/
+
+/* Cor dos ícones quando hover */
+/*
+.hover\:text-wkp-primary-darker:hover {
+  color: #6D28D9 !important;
+}
+*/

@@ -6,11 +6,10 @@ import type { VideoPlayerRef } from './video-player';
 import { useCameraStream } from '../hooks/use-camera-stream';
 import { useMediaRecorder } from '../hooks/use-media-recorder';
 import { useCountdown } from '../hooks/use-countdown';
-import { useVideoProgress } from '../hooks/use-video-progress';
 import { getTheme } from '../helpers/theme';
 import { getSupportedMimeType } from '../helpers/codec-detection';
 import { isMediaRecorderSupported, isIOS } from '../helpers/device-detection';
-import { formatTime } from '../helpers/time';
+import { getControlColorsStyle } from '../helpers/colors';
 import {
   ProgressBar,
   PlayButton,
@@ -35,6 +34,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   allowReRecord = true,
   onRecordingComplete,
   autoStart = false,
+  colors,
 }) => {
   const theme = getTheme(jobType);
   const [mimeType, setMimeType] = useState<string | null>(null);
@@ -364,6 +364,8 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     }
   };
 
+  const controlColorsStyle = getControlColorsStyle(colors);
+
   return (
     <div
       className={`relative w-full h-full bg-transparent flex flex-col ${
@@ -373,6 +375,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           ? 'p-0'
           : 'p-2 sm:p-4 md:p-6 lg:p-8'
       }`}
+      style={colors ? controlColorsStyle : undefined}
     >
       {/* Video Canvas Container */}
       <div
@@ -397,6 +400,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
               className="transform scale-x-[-1]"
               autoPlay={true}
               muted={true}
+              colors={colors}
             />
           )}
 
@@ -411,6 +415,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
                 jobType={jobType}
                 hideControls={true}
                 onStateChange={setVideoPlayerState}
+                colors={colors}
                 bigPlayButtonRightButton={
                   status === RecorderStatus.REVIEWING &&
                   !isPreviewPlaying &&
@@ -433,7 +438,6 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
                     status === RecorderStatus.COMPLETED) ? (
                     <FullscreenControlBar
                       theme={theme}
-                      jobType={jobType}
                       isPlaying={isPreviewPlaying}
                       isMuted={isMuted}
                       volume={volume}

@@ -14,6 +14,22 @@ export enum RecorderStatus {
   COMPLETED = 'completed',
 }
 
+/**
+ * Interface para cores customizáveis dos controles de vídeo
+ */
+export interface VideoControlsColors {
+  /** Cor de fundo dos controles (barra de controles) - padrão: roxo claro */
+  controlBarBg?: string;
+  /** Cor dos controles individuais (ícones, textos) - padrão: roxo forte */
+  controlColor?: string;
+  /** Cor dos controles no estado hover - padrão: roxo mais escuro */
+  controlColorHover?: string;
+  /** Cor da barra de progresso preenchida - padrão: roxo forte */
+  progressFill?: string;
+  /** Cor de fundo da barra de progresso - padrão: cinza claro */
+  progressBg?: string;
+}
+
 export interface VideoPlayerProps {
   src?: string;
   srcObject?: MediaStream;
@@ -37,6 +53,8 @@ export interface VideoPlayerProps {
   muted?: boolean;
   bigPlayButtonRightButton?: React.ReactNode;
   customFullscreenControlBar?: React.ReactNode;
+  /** Cores customizáveis para os controles */
+  colors?: VideoControlsColors;
 }
 
 export interface PlayerState {
@@ -56,4 +74,6 @@ export interface VideoRecorderProps {
   allowReRecord?: boolean;
   onRecordingComplete?: (blob: Blob) => void;
   autoStart?: boolean; // Se true, inicia stream e gravação automaticamente
+  /** Cores customizáveis para os controles */
+  colors?: VideoControlsColors;
 }
