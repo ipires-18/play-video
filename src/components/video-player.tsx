@@ -25,7 +25,7 @@ import {
   ControlBar,
   FullscreenControlBar,
 } from './shared';
-import { cn } from '@foursales/components';
+import { cn } from '../utils/cn';
 
 export interface VideoPlayerRef {
   togglePlay: () => void;

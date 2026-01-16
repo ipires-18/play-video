@@ -1,6 +1,6 @@
 import React from 'react';
 import { Theme } from '../../helpers/theme';
-import { cn } from '@foursales/components';
+import { cn } from '../../utils/cn';
 
 export interface ProgressBarProps {
   progressPercentage: number;

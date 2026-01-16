@@ -1,6 +1,9 @@
 export { ProgressBar } from './progress-bar';
 export type { ProgressBarProps } from './progress-bar';
 export { PlayButton } from './play-button';
+export { Button } from './button';
+export type { ButtonProps } from './button';
+export { LogoAnimation } from './logo-animation';
 export type { PlayButtonProps } from './play-button';
 export { VolumeControl } from './volume-control';
 export type { VolumeControlProps } from './volume-control';

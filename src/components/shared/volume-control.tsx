@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Icons from '../icons';
-import { cn } from '@foursales/components';
+import { cn } from '../../utils/cn';
 import { getTheme } from '../../helpers/theme';
 import { JobType } from '../../../types';
 

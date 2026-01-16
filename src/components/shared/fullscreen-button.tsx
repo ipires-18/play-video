@@ -1,6 +1,6 @@
 import React from 'react';
 import Icons from '../icons';
-import { cn } from '@foursales/components';
+import { cn } from '../../utils/cn';
 
 export interface FullscreenButtonProps {
   isFullscreen: boolean;

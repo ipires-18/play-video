@@ -26,7 +26,8 @@ import {
   FullscreenControlBar,
 } from './shared';
 import { CountdownOverlay } from './shared/countdown-overlay';
-import { Button, LogoAnimation } from '@foursales/components';
+import { Button } from './shared/button';
+import { LogoAnimation } from './shared/logo-animation';
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
   jobType,

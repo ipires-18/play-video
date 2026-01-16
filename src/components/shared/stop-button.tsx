@@ -1,6 +1,6 @@
 import React from 'react';
 import Icons from '../icons';
-import { cn, Typography } from '@foursales/components';
+import { cn } from '../../utils/cn';
 
 export interface StopButtonProps {
   onClick: () => void;
@@ -28,16 +28,15 @@ export const StopButton: React.FC<StopButtonProps> = ({
           className
         )}
       />
-      <Typography
+      <span
         className={cn(
-          'whitespace-nowrap tabular-nums text-wkp-primary-dark group-hover:text-wkp-primary-darker transition-colors',
+          'whitespace-nowrap tabular-nums text-wkp-primary-dark group-hover:text-wkp-primary-darker transition-colors text-sm font-normal',
           className
         )}
-        variant="body-medium-regular"
         aria-label={ariaLabel}
       >
         Concluir
-      </Typography>
+      </span>
     </button>
   );
 };

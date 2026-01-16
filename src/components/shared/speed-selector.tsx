@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useClickOutside } from '../../hooks/use-click-outside';
-import { cn, Typography } from '@foursales/components';
+import { cn } from '../../utils/cn';
 
 export interface SpeedSelectorProps {
   playbackRate: number;
@@ -42,12 +42,14 @@ export const SpeedSelector: React.FC<SpeedSelectorProps> = ({
         aria-label="Velocidade de reprodução"
         aria-expanded={showMenu}
       >
-        <Typography
-          className={cn('whitespace-nowrap tabular-nums ', className)}
-          variant="body-medium-regular"
+        <span
+          className={cn(
+            'whitespace-nowrap tabular-nums text-sm font-normal',
+            className
+          )}
         >
           {playbackRate}x
-        </Typography>
+        </span>
       </button>
       {showMenu && (
         <div
@@ -64,18 +66,17 @@ export const SpeedSelector: React.FC<SpeedSelectorProps> = ({
               className="px-3 py-1.5 text-xs text-left rounded hover:bg-slate-100 transition-colors cursor-pointer"
               style={{ cursor: 'pointer' }}
             >
-              <Typography
+              <span
                 className={cn(
-                  'whitespace-nowrap tabular-nums',
+                  'whitespace-nowrap tabular-nums text-sm font-normal',
                   playbackRate === rate
                     ? 'text-wkp-primary-darker'
                     : 'text-wkp-primary-dark',
                   className
                 )}
-                variant="body-medium-regular"
               >
                 {rate}x
-              </Typography>
+              </span>
             </button>
           ))}
         </div>

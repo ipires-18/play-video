@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@foursales/components';
+import { cn } from '../../utils/cn';
 import { RecorderStatus } from '../../../types';
 
 export interface StatusIconProps {
