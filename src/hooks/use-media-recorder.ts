@@ -14,6 +14,7 @@ export interface UseMediaRecorderReturn {
   elapsedTime: number;
   recordedChunks: Blob[];
   previewUrl: string | null;
+  isProcessingChunks: boolean;
   startRecording: () => void;
   stopRecording: () => void;
   setStatus: (status: RecorderStatus) => void;
@@ -35,6 +36,7 @@ export const useMediaRecorder = ({
   const [elapsedTime, setElapsedTime] = useState(0);
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isProcessingChunks, setIsProcessingChunks] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const timerIntervalRef = useRef<number | null>(null);
@@ -44,6 +46,8 @@ export const useMediaRecorder = ({
   const maxWaitTimeRef = useRef<number>(3000); // 3 segundos máximo de espera
   const previewCreatedRef = useRef<boolean>(false);
   const chunksSnapshotRef = useRef<Blob[]>([]);
+  // Ref local para armazenar chunks durante a gravação (mais confiável que state)
+  const chunksRef = useRef<Blob[]>([]);
 
   const startRecording = useCallback(() => {
     if (!stream) return;
@@ -52,8 +56,21 @@ export const useMediaRecorder = ({
       return;
     }
 
+    // Prevenir múltiplas inicializações - se já existe um recorder ativo, não iniciar outro
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== 'inactive'
+    ) {
+      console.warn(
+        '⚠️ MediaRecorder já está ativo, ignorando nova inicialização'
+      );
+      return;
+    }
+
     setRecordedChunks([]);
+    chunksRef.current = []; // Limpar ref local também
     setElapsedTime(0);
+    setIsProcessingChunks(false); // Resetar loading
     stopRequestedRef.current = false;
     chunksAtStopRef.current = 0;
     previewCreatedRef.current = false;
@@ -76,13 +93,28 @@ export const useMediaRecorder = ({
 
       // Limpar chunks anteriores
       setRecordedChunks([]);
+      chunksRef.current = [];
 
       recorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
+        // IMPORTANTE: Capturar TODOS os chunks, mesmo os vazios podem ser importantes
+        // Alguns navegadores enviam chunks vazios no final que precisam ser processados
+        if (event.data) {
+          // Armazenar no ref local primeiro (mais confiável)
+          chunksRef.current.push(event.data);
+
+          // Atualizar state também para sincronização
           setRecordedChunks((prev) => {
             const newChunks = [...prev, event.data];
             return newChunks;
           });
+
+          const totalSize = chunksRef.current.reduce(
+            (sum, c) => sum + c.size,
+            0
+          );
+          console.log(
+            `📦 Chunk recebido: ${event.data.size} bytes (total: ${chunksRef.current.length} chunks, ${totalSize} bytes)`
+          );
         }
       };
 
@@ -94,59 +126,96 @@ export const useMediaRecorder = ({
           timerIntervalRef.current = null;
         }
 
+        // Ativar loading enquanto processa chunks
+        setIsProcessingChunks(true);
+
         // Marcar que o stop foi chamado e aguardar processamento dos chunks
         stopRequestedRef.current = true;
         const stopTime = Date.now();
         let lastChunkCount = 0;
+        let lastTotalSize = 0;
         let stableIterations = 0;
+        // Aguardar um tempo mínimo antes de começar a verificar estabilidade
+        // Isso garante que chunks que ainda estão sendo processados tenham tempo de chegar
+        const minWaitTime = 500; // 500ms mínimo de espera
 
         const checkInterval = setInterval(() => {
-          // Obter o estado atual dos chunks através de uma função de callback
-          setRecordedChunks((currentChunks) => {
-            const currentCount = currentChunks.length;
-            const elapsed = Date.now() - stopTime;
+          // Usar o ref local que é mais confiável e atualizado em tempo real
+          const currentChunks = chunksRef.current;
+          const currentCount = currentChunks.length;
+          const currentTotalSize = currentChunks.reduce(
+            (sum, chunk) => sum + chunk.size,
+            0
+          );
+          const elapsed = Date.now() - stopTime;
 
-            // Se o número de chunks mudou, resetar contador de estabilidade
-            if (currentCount !== lastChunkCount) {
-              lastChunkCount = currentCount;
-              stableIterations = 0;
+          // Se ainda não passou o tempo mínimo, continuar aguardando
+          if (elapsed < minWaitTime) {
+            console.log(
+              `⏳ Aguardando tempo mínimo... (${elapsed}ms / ${minWaitTime}ms)`
+            );
+            return;
+          }
+
+          // Se o número de chunks ou tamanho total mudou, resetar contador de estabilidade
+          if (
+            currentCount !== lastChunkCount ||
+            currentTotalSize !== lastTotalSize
+          ) {
+            lastChunkCount = currentCount;
+            lastTotalSize = currentTotalSize;
+            stableIterations = 0;
+            console.log(
+              `⏳ Aguardando chunks finais... (${currentCount} chunks, ${currentTotalSize} bytes)`
+            );
+          } else {
+            stableIterations++;
+          }
+
+          // Se o número de chunks e tamanho estão estáveis por 20 verificações (1000ms após tempo mínimo),
+          // considerar completo. Isso garante que todos os chunks finais tenham tempo de chegar
+          if (stableIterations >= 20 && currentCount > 0) {
+            clearInterval(checkInterval);
+            stopRequestedRef.current = false;
+            // Fazer snapshot dos chunks finais antes de mudar o status
+            chunksSnapshotRef.current = [...currentChunks];
+            // Sincronizar state também
+            setRecordedChunks([...currentChunks]);
+            console.log(
+              `✅ Gravação completa: ${currentCount} chunks, ${currentTotalSize} bytes`
+            );
+            // Desativar loading quando chunks estiverem processados
+            setIsProcessingChunks(false);
+            setStatus(RecorderStatus.REVIEWING);
+            onRecordingComplete();
+            return;
+          }
+
+          // Timeout máximo - se não processar em 5 segundos, usar o que temos
+          // Aumentado para dar mais tempo para chunks finais chegarem
+          if (elapsed > 5000) {
+            clearInterval(checkInterval);
+            stopRequestedRef.current = false;
+            // Fazer snapshot dos chunks disponíveis mesmo com timeout
+            chunksSnapshotRef.current = [...currentChunks];
+            setRecordedChunks([...currentChunks]);
+            if (currentCount === 0) {
+              console.error('❌ Nenhum chunk foi processado');
+              alert(
+                'Erro: Nenhum chunk de vídeo foi processado. A gravação falhou completamente.'
+              );
             } else {
-              stableIterations++;
+              console.warn(
+                `⚠️ Timeout: usando ${currentCount} chunks disponíveis (${currentTotalSize} bytes)`
+              );
+              // Não mostrar alerta se temos chunks, apenas usar o que temos
             }
-
-            // Se o número de chunks está estável por 4 verificações (200ms), considerar completo
-            if (stableIterations >= 4 && currentCount > 0) {
-              clearInterval(checkInterval);
-              stopRequestedRef.current = false;
-              // Fazer snapshot dos chunks finais antes de mudar o status
-              chunksSnapshotRef.current = [...currentChunks];
-              setStatus(RecorderStatus.REVIEWING);
-              onRecordingComplete();
-              return currentChunks;
-            }
-
-            // Timeout máximo - se não processar em 3 segundos, mostrar erro
-            if (elapsed > maxWaitTimeRef.current) {
-              clearInterval(checkInterval);
-              stopRequestedRef.current = false;
-              // Fazer snapshot dos chunks disponíveis mesmo com timeout
-              chunksSnapshotRef.current = [...currentChunks];
-              if (currentCount === 0) {
-                alert(
-                  'Erro: Nenhum chunk de vídeo foi processado. A gravação falhou completamente.'
-                );
-              } else {
-                alert(
-                  'Erro: Nem todos os chunks de vídeo foram processados dentro do tempo limite. A gravação pode estar incompleta.'
-                );
-              }
-              setStatus(RecorderStatus.REVIEWING);
-              onRecordingComplete();
-              return currentChunks;
-            }
-
-            return currentChunks;
-          });
+            // Desativar loading mesmo com timeout
+            setIsProcessingChunks(false);
+            setStatus(RecorderStatus.REVIEWING);
+            onRecordingComplete();
+            return;
+          }
         }, 50);
       };
 
@@ -167,8 +236,11 @@ export const useMediaRecorder = ({
         setStatus(RecorderStatus.IDLE);
       };
 
-      // Para iOS/Safari, usar timeslice maior pode ajudar
-      const timeslice = isIOS ? 2000 : 1000;
+      // Reduzir timeslice para capturar chunks mais frequentemente e evitar perda de dados
+      // Valores menores = mais chunks = melhor captura do stream ao vivo
+      // 100ms garante captura muito frequente e reduz perda de dados
+      const timeslice = isIOS ? 200 : 100;
+      console.log(`🎬 Iniciando gravação com timeslice de ${timeslice}ms`);
       recorder.start(timeslice);
       mediaRecorderRef.current = recorder;
       setStatus(RecorderStatus.RECORDING);
@@ -181,14 +253,38 @@ export const useMediaRecorder = ({
               mediaRecorderRef.current &&
               mediaRecorderRef.current.state !== 'inactive'
             ) {
+              console.log('⏱️ Tempo máximo atingido, parando gravação...');
               // Forçar captura do último chunk antes de parar
               try {
                 mediaRecorderRef.current.requestData();
+                // Chamar novamente após um delay para garantir captura completa
+                setTimeout(() => {
+                  try {
+                    if (
+                      mediaRecorderRef.current &&
+                      mediaRecorderRef.current.state !== 'inactive'
+                    ) {
+                      mediaRecorderRef.current.requestData();
+                    }
+                  } catch (e) {
+                    console.log('Segundo requestData não suportado');
+                  }
+                }, 50);
+
+                // Aguardar mais tempo para garantir que o último chunk seja processado
+                setTimeout(() => {
+                  if (
+                    mediaRecorderRef.current &&
+                    mediaRecorderRef.current.state !== 'inactive'
+                  ) {
+                    mediaRecorderRef.current.stop();
+                  }
+                }, 300);
               } catch (e) {
                 // Alguns navegadores podem não suportar requestData
                 console.log('requestData not supported or already called');
+                mediaRecorderRef.current.stop();
               }
-              mediaRecorderRef.current.stop();
             }
             if (timerIntervalRef.current) {
               clearInterval(timerIntervalRef.current);
@@ -211,15 +307,48 @@ export const useMediaRecorder = ({
       mediaRecorderRef.current &&
       mediaRecorderRef.current.state !== 'inactive'
     ) {
+      console.log('🛑 Parando gravação...');
+      console.log(
+        `📊 Chunks atuais antes de parar: ${chunksRef.current.length} chunks, ${chunksRef.current.reduce((sum, c) => sum + c.size, 0)} bytes`
+      );
+
+      // Ativar loading imediatamente quando parar a gravação
+      setIsProcessingChunks(true);
+
       // Forçar captura do último chunk antes de parar
       try {
+        // Chamar requestData() múltiplas vezes para garantir captura de todos os dados pendentes
         mediaRecorderRef.current.requestData();
+
+        // Aguardar um pouco e chamar novamente para garantir que não perdemos nada
+        setTimeout(() => {
+          try {
+            if (
+              mediaRecorderRef.current &&
+              mediaRecorderRef.current.state !== 'inactive'
+            ) {
+              mediaRecorderRef.current.requestData();
+            }
+          } catch (e) {
+            console.log('Segundo requestData não suportado ou já chamado');
+          }
+        }, 50);
+
+        // Aguardar mais tempo para garantir que o último chunk seja processado antes de parar
+        setTimeout(() => {
+          if (
+            mediaRecorderRef.current &&
+            mediaRecorderRef.current.state !== 'inactive'
+          ) {
+            console.log('🛑 Chamando stop() após requestData()');
+            mediaRecorderRef.current.stop();
+          }
+        }, 300); // Aumentar delay para garantir processamento completo
       } catch (e) {
         // Alguns navegadores podem não suportar requestData
         console.log('requestData not supported or already called');
+        mediaRecorderRef.current.stop();
       }
-      // Parar a gravação - o status será mudado no onstop
-      mediaRecorderRef.current.stop();
     }
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
@@ -303,6 +432,7 @@ export const useMediaRecorder = ({
     elapsedTime,
     recordedChunks,
     previewUrl,
+    isProcessingChunks,
     startRecording,
     stopRecording,
     setStatus,

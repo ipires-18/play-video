@@ -26,7 +26,7 @@ import {
   FullscreenControlBar,
 } from './shared';
 import { CountdownOverlay } from './shared/countdown-overlay';
-import { Button } from '@foursales/components';
+import { Button, LogoAnimation } from '@foursales/components';
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
   jobType,
@@ -62,6 +62,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     elapsedTime,
     recordedChunks,
     previewUrl,
+    isProcessingChunks,
     startRecording,
     stopRecording,
     setStatus,
@@ -474,6 +475,17 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         {/* Countdown Overlay */}
         {status === RecorderStatus.COUNTDOWN && (
           <CountdownOverlay countdownValue={activeCountdown} />
+        )}
+
+        {/* Loading Overlay - Processando chunks do vídeo */}
+        {isProcessingChunks && (
+          <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm text-white">
+            <LogoAnimation className="h-12 w-12 text-white mb-4" />
+            <p className="text-lg font-medium">Aguarde um instante!</p>
+            <p className="text-sm text-white/80 mt-1">
+              Seu vídeo está sendo gerado.
+            </p>
+          </div>
         )}
 
         {/* Initial Overlay if not streaming */}
